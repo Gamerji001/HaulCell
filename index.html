@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HaulCell - Smart Street Food OS</title>
+    
+    <!-- External Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #000; color: white; overflow-x: hidden; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .text-gradient {
+            background: linear-gradient(to right, #60a5fa, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .blob {
+            position: absolute;
+            filter: blur(80px);
+            z-index: -1;
+            opacity: 0.4;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const App = () => {
+            useEffect(() => { if(window.lucide) window.lucide.createIcons(); }, []);
+
+            const handleAlert = (feature) => {
+                alert(`${feature} page is coming soon! Focus on the App Links below.`);
+            };
+
+            return (
+                <div className="relative min-h-screen flex flex-col">
+                    
+                    {/* Background Blobs (Glow Effect) */}
+                    <div className="blob bg-blue-600 w-96 h-96 rounded-full top-0 left-0"></div>
+                    <div className="blob bg-purple-600 w-80 h-80 rounded-full bottom-0 right-0"></div>
+
+                    {/* NAVBAR */}
+                    <nav className="flex justify-between items-center p-6 max-w-7xl mx-auto w-full z-10">
+                        <div className="text-2xl font-bold tracking-tighter flex items-center gap-2 cursor-pointer" onClick={() => window.location.reload()}>
+                            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                                <i data-lucide="zap" className="text-white w-5"></i>
+                            </div>
+                            HaulCell
+                        </div>
+                        <div className="hidden md:flex gap-8 text-sm text-gray-400 font-medium">
+                            <button onClick={() => handleAlert('Solution')} className="hover:text-white transition">Solution</button>
+                            <button onClick={() => handleAlert('Case Studies')} className="hover:text-white transition">Case Studies</button>
+                            <button onClick={() => handleAlert('Pricing')} className="hover:text-white transition">Pricing</button>
+                        </div>
+                        <button onClick={() => handleAlert('Partnership')} className="bg-white text-black px-5 py-2 rounded-full font-bold text-sm hover:bg-gray-200 transition">
+                            Partner With Us
+                        </button>
+                    </nav>
+
+                    {/* HERO SECTION */}
+                    <main className="flex-1 flex flex-col items-center justify-center text-center px-4 mt-10 md:mt-20 z-10">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card text-xs font-medium text-blue-300 mb-6 animate-pulse">
+                            <span className="w-2 h-2 bg-blue-400 rounded-full"></span>
+                            Live Pilot: Ashima Smart Zone
+                        </div>
+
+                        <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 leading-tight max-w-4xl">
+                            The Operating System for <br />
+                            <span className="text-gradient">Smart Street Markets</span>
+                        </h1>
+
+                        <p className="text-gray-400 text-lg md:text-xl max-w-2xl mb-12">
+                            HaulCell transforms chaotic street food hubs into organized, tech-enabled Smart Zones. Experience In-Car Delivery and Cloud Management.
+                        </p>
+
+                        {/* PORTAL CARDS (The Main Links) */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl">
+                            
+                            {/* Card 1: Customer - Fixed Relative Link */}
+                            <a href="customer/index.html" className="glass-card p-8 rounded-2xl hover:bg-white/5 transition-all group text-left relative overflow-hidden cursor-pointer block">
+                                <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition">
+                                    <i data-lucide="qr-code" width="100" height="100"></i>
+                                </div>
+                                <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center text-blue-400 mb-6 group-hover:scale-110 transition-transform">
+                                    <i data-lucide="scan-line" width="24"></i>
+                                </div>
+                                <h3 className="text-xl font-bold mb-2">Customer App</h3>
+                                <p className="text-sm text-gray-400 mb-6">Scan QR, Order from Car, Skip the line.</p>
+                                <div className="flex items-center text-blue-400 text-sm font-bold gap-2">
+                                    Launch App <i data-lucide="arrow-right" width="16"></i>
+                                </div>
+                            </a>
+
+                            {/* Card 2: Vendor - Fixed Relative Link */}
+                            <a href="vendor/index.html" className="glass-card p-8 rounded-2xl hover:bg-white/5 transition-all group text-left relative overflow-hidden border-orange-500/30 hover:border-orange-500/50 cursor-pointer block">
+                                <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition text-orange-500">
+                                    <i data-lucide="chef-hat" width="100" height="100"></i>
+                                </div>
+                                <div className="w-12 h-12 bg-orange-500/20 rounded-xl flex items-center justify-center text-orange-400 mb-6 group-hover:scale-110 transition-transform">
+                                    <i data-lucide="utensils" width="24"></i>
+                                </div>
+                                <h3 className="text-xl font-bold mb-2 text-orange-100">Vendor OS</h3>
+                                <p className="text-sm text-gray-400 mb-6">Manage orders, kitchen flow & revenue.</p>
+                                <div className="flex items-center text-orange-400 text-sm font-bold gap-2">
+                                    Access Panel <i data-lucide="arrow-right" width="16"></i>
+                                </div>
+                            </a>
+
+                            {/* Card 3: Admin - Fixed Relative Link */}
+                            <a href="admin/index.html" className="glass-card p-8 rounded-2xl hover:bg-white/5 transition-all group text-left relative overflow-hidden border-purple-500/30 hover:border-purple-500/50 cursor-pointer block">
+                                <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition text-purple-500">
+                                    <i data-lucide="shield" width="100" height="100"></i>
+                                </div>
+                                <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center text-purple-400 mb-6 group-hover:scale-110 transition-transform">
+                                    <i data-lucide="bar-chart-2" width="24"></i>
+                                </div>
+                                <h3 className="text-xl font-bold mb-2 text-purple-100">Super Admin</h3>
+                                <p className="text-sm text-gray-400 mb-6">Real-time control center & analytics.</p>
+                                <div className="flex items-center text-purple-400 text-sm font-bold gap-2">
+                                    View Dashboard <i data-lucide="arrow-right" width="16"></i>
+                                </div>
+                            </a>
+
+                        </div>
+                    </main>
+
+                    {/* FOOTER */}
+                    <footer className="mt-20 border-t border-white/10 py-8 text-center text-gray-600 text-sm z-10">
+                        <p>© 2025 HaulCell Technologies Pvt Ltd. All rights reserved.</p>
+                        <p className="mt-2">Made with ❤️ in Bhopal for Digital India.</p>
+                    </footer>
+
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
