@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ashima Smart Zone - Vendor Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .order-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .tab-active {
+            color: #f97316;
+            border-bottom: 4px solid #f97316;
+            background-color: #fff7ed;
+        }
+
+        @keyframes pulse-yellow {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.7); }
+            70% { transform: scale(1.02); box-shadow: 0 0 0 10px rgba(251, 191, 36, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(251, 191, 36, 0); }
+        }
+
+        .new-order-anim {
+            animation: pulse-yellow 2s infinite;
+        }
+
+        .empty-state {
+            display: none;
+        }
+
+        .empty-state.active {
+            display: flex;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 pb-24 select-none">
+
+    <!-- Top Navigation -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="p-4 flex justify-between items-center border-b">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-orange-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-orange-200">
+                    <i data-lucide="store" class="w-7 h-7"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-black uppercase tracking-tight leading-none">Sharma Ji Chaat</h1>
+                    <div class="flex items-center gap-1 mt-1">
+                        <span class="w-2 h-2 bg-green-500 rounded-full animate-ping"></span>
+                        <span class="text-green-600 font-bold text-[10px] uppercase">Verified Shop</span>
+                    </div>
+                </div>
+            </div>
+            <button id="toggleOnline" onclick="toggleStatus()" class="flex flex-col items-center bg-green-50 text-green-700 border-2 border-green-500 px-4 py-1.5 rounded-2xl transition-all active:scale-90">
+                <i data-lucide="power" class="w-5 h-5"></i>
+                <span id="statusLabel" class="text-[10px] font-black uppercase">Online</span>
+            </button>
+        </div>
+
+        <!-- Order Tabs -->
+        <div class="flex text-center border-b overflow-x-auto">
+            <button onclick="switchTab('incoming')" id="tab-incoming" class="flex-1 py-4 flex flex-col items-center gap-1 tab-active transition-all">
+                <div class="relative">
+                    <i data-lucide="bell" class="w-6 h-6"></i>
+                    <span id="count-incoming" class="absolute -top-2 -right-3 bg-red-600 text-white text-[10px] font-black w-5 h-5 rounded-full hidden items-center justify-center">0</span>
+                </div>
+                <span class="text-[10px] font-black">INCOMING</span>
+            </button>
+            <button onclick="switchTab('cooking')" id="tab-cooking" class="flex-1 py-4 flex flex-col items-center gap-1 text-slate-400 transition-all border-b-4 border-transparent">
+                <i data-lucide="flame" class="w-6 h-6"></i>
+                <span class="text-[10px] font-black uppercase">Cooking</span>
+            </button>
+            <button onclick="switchTab('ready')" id="tab-ready" class="flex-1 py-4 flex flex-col items-center gap-1 text-slate-400 transition-all border-b-4 border-transparent">
+                <i data-lucide="package-check" class="w-6 h-6"></i>
+                <span class="text-[10px] font-black uppercase">Ready</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Order Feed Section -->
+    <main id="mainContainer" class="p-4">
+        <div id="orderList" class="space-y-4">
+            <!-- Orders will be injected here by JS -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="empty-state active flex-col items-center justify-center py-20 text-slate-300">
+            <i data-lucide="shopping-bag" class="w-20 h-20 mb-4 opacity-20"></i>
+            <p class="font-black uppercase tracking-widest text-lg">No Orders Now</p>
+        </div>
+    </main>
+
+    <!-- Bottom Sales Summary -->
+    <footer class="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex justify-between items-center shadow-[0_-10px_20px_rgba(0,0,0,0.05)] z-50">
+        <div class="flex items-center gap-4 bg-slate-50 p-2 pr-6 rounded-2xl border border-slate-100">
+            <div class="bg-green-600 p-2 rounded-xl text-white shadow-md">
+                <i data-lucide="trending-up" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <p class="text-[10px] font-black text-slate-400 uppercase leading-none">Today's Total</p>
+                <p class="text-2xl font-black text-slate-800 tracking-tight">₹<span id="totalSales">0</span></p>
+            </div>
+        </div>
+        <button onclick="location.reload()" class="p-3 bg-slate-100 text-slate-500 rounded-2xl active:bg-slate-200">
+            <i data-lucide="refresh-cw" class="w-6 h-6"></i>
+        </button>
+    </footer>
+
+    <!-- Audio Placeholder Logic -->
+    <script>
+        // Global State
+        let currentTab = 'incoming';
+        let isOnline = true;
+        let sales = 0;
+        
+        let orders = [
+            { id: 101, name: 'Pani Puri (Full Plate)', qty: 2, price: 60, status: 'incoming', mode: 'Pickup', plate: '' },
+            { id: 102, name: 'Aloo Tikki Chaat', qty: 1, price: 40, status: 'cooking', mode: 'Car Delivery', plate: 'MP04-AA-1122' }
+        ];
+
+        // Initialize UI
+        function init() {
+            lucide.createIcons();
+            renderOrders();
+            updateStats();
+        }
+
+        function toggleStatus() {
+            isOnline = !isOnline;
+            const btn = document.getElementById('toggleOnline');
+            const label = document.getElementById('statusLabel');
+            
+            if(isOnline) {
+                btn.className = "flex flex-col items-center bg-green-50 text-green-700 border-2 border-green-500 px-4 py-1.5 rounded-2xl transition-all active:scale-90";
+                label.innerText = "Online";
+                document.getElementById('mainContainer').style.opacity = "1";
+            } else {
+                btn.className = "flex flex-col items-center bg-red-50 text-red-700 border-2 border-red-500 px-4 py-1.5 rounded-2xl transition-all active:scale-90";
+                label.innerText = "Offline";
+                document.getElementById('mainContainer').style.opacity = "0.4";
+            }
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            // Update UI tabs
+            ['incoming', 'cooking', 'ready'].forEach(t => {
+                const el = document.getElementById('tab-' + t);
+                el.className = "flex-1 py-4 flex flex-col items-center gap-1 transition-all border-b-4 " + (t === tab ? "tab-active" : "text-slate-400 border-transparent");
+            });
+            renderOrders();
+        }
+
+        function renderOrders() {
+            const list = document.getElementById('orderList');
+            const empty = document.getElementById('emptyState');
+            const filtered = orders.filter(o => o.status === currentTab);
+            
+            list.innerHTML = '';
+            
+            if (filtered.length === 0) {
+                empty.classList.add('active');
+            } else {
+                empty.classList.remove('active');
+                filtered.forEach(order => {
+                    const card = document.createElement('div');
+                    card.className = `order-card bg-white rounded-3xl shadow-sm border-2 border-white overflow-hidden ${order.status === 'incoming' ? 'new-order-anim' : ''}`;
+                    
+                    let actionHtml = '';
+                    if(order.status === 'incoming') {
+                        actionHtml = `
+                            <div class="grid grid-cols-2 gap-3">
+                                <button onclick="handleOrder(${order.id}, 'cancel')" class="bg-slate-100 text-slate-500 font-black py-4 rounded-2xl active:scale-95 transition-transform uppercase">Reject</button>
+                                <button onclick="handleOrder(${order.id}, 'cooking')" class="bg-green-600 text-white font-black py-4 rounded-2xl shadow-lg shadow-green-200 active:scale-95 transition-transform uppercase">Accept</button>
+                            </div>
+                        `;
+                    } else if(order.status === 'cooking') {
+                        actionHtml = `<button onclick="handleOrder(${order.id}, 'ready')" class="w-full bg-orange-500 text-white font-black py-5 rounded-2xl text-lg shadow-lg shadow-orange-200 active:scale-95 transition-transform uppercase">Mark as Ready</button>`;
+                    } else if(order.status === 'ready') {
+                        actionHtml = `<button onclick="handleOrder(${order.id}, 'delivered')" class="w-full bg-blue-600 text-white font-black py-5 rounded-2xl text-lg shadow-lg shadow-blue-200 active:scale-95 transition-transform uppercase">Handed Over</button>`;
+                    }
+
+                    card.innerHTML = `
+                        ${order.plate ? `<div class="bg-yellow-400 text-black text-center py-1.5 font-black text-xs uppercase flex items-center justify-center gap-2"><i data-lucide="car" class="w-4 h-4"></i> Car: ${order.plate}</div>` : ''}
+                        <div class="p-5">
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="bg-slate-100 px-3 py-1 rounded-lg font-black text-slate-600 text-sm">#${order.id}</span>
+                                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">${order.mode}</span>
+                            </div>
+                            <h2 class="text-2xl font-black text-slate-800 mb-1 leading-tight">${order.name}</h2>
+                            <p class="text-orange-600 font-black text-xl mb-6 tracking-wide">QTY: ${order.qty}</p>
+                            ${actionHtml}
+                        </div>
+                    `;
+                    list.appendChild(card);
+                });
+            }
+            lucide.createIcons();
+            updateStats();
+        }
+
+        function handleOrder(id, nextStatus) {
+            const index = orders.findIndex(o => o.id === id);
+            if (nextStatus === 'cancel') {
+                orders.splice(index, 1);
+            } else if (nextStatus === 'delivered') {
+                sales += (orders[index].price * orders[index].qty);
+                orders.splice(index, 1);
+            } else {
+                orders[index].status = nextStatus;
+            }
+            renderOrders();
+        }
+
+        function updateStats() {
+            document.getElementById('totalSales').innerText = sales.toLocaleString();
+            const incomingCount = orders.filter(o => o.status === 'incoming').length;
+            const badge = document.getElementById('count-incoming');
+            if(incomingCount > 0) {
+                badge.innerText = incomingCount;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        // New Order Simulation
+        setInterval(() => {
+            if(!isOnline) return;
+            if(Math.random() > 0.8) {
+                const newId = Math.floor(100 + Math.random() * 900);
+                orders.push({
+                    id: newId,
+                    name: 'Special Mix Chaat',
+                    qty: 1,
+                    price: 50,
+                    status: 'incoming',
+                    mode: Math.random() > 0.5 ? 'Pickup' : 'Car Delivery',
+                    plate: Math.random() > 0.5 ? 'MP04-ZX-5050' : ''
+                });
+                if(currentTab === 'incoming') renderOrders();
+                else updateStats();
+            }
+        }, 8000);
+
+        window.onload = init;
+    </script>
+</body>
+</html>
